@@ -1,0 +1,13 @@
+[package]
+name = "preamble-rs"
+version = "0.1.0"
+authors = ["Kesavan Yogeswaran <kesyog@gmail.com>"]
+edition = "2018"
+license = "MIT"
+homepage = "https://github.com/kesyog/preamble-rs"
+repository = "https://github.com/kesyog/preamble-rs"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+simple-error = "0.2.1"
