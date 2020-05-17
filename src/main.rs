@@ -1,10 +1,8 @@
-//use std::io::Result;
 use simple_error::SimpleError;
 
-#[derive(PartialEq)]
 enum Weather {
     Clear,
-    PartiallyCloudy,
+    PartlyCloudy,
     Overcast,
     Rain,
     HeavyRain,
@@ -12,7 +10,9 @@ enum Weather {
 }
 
 impl Default for Weather {
-    fn default() -> Self { Weather::Clear }
+    fn default() -> Self {
+        Weather::Clear
+    }
 }
 
 enum Wind {
@@ -22,7 +22,9 @@ enum Wind {
 }
 
 impl Default for Wind {
-    fn default() -> Self { Wind::Calm }
+    fn default() -> Self {
+        Wind::Calm
+    }
 }
 
 enum TimeOfDay {
@@ -33,7 +35,9 @@ enum TimeOfDay {
 }
 
 impl Default for TimeOfDay {
-    fn default() -> Self { TimeOfDay::Daytime }
+    fn default() -> Self {
+        TimeOfDay::Daytime
+    }
 }
 
 enum Sex {
@@ -42,7 +46,10 @@ enum Sex {
 }
 
 impl Default for Sex {
-    fn default() -> Self { Sex::Male } // ¯\_(ツ)_/¯ 
+    fn default() -> Self {
+        // ¯\_(ツ)_/¯
+        Sex::Male
+    }
 }
 
 enum Intensity {
@@ -53,7 +60,9 @@ enum Intensity {
 }
 
 impl Default for Intensity {
-    fn default() -> Self { Intensity::Average }
+    fn default() -> Self {
+        Intensity::Average
+    }
 }
 
 enum Feel {
@@ -63,7 +72,9 @@ enum Feel {
 }
 
 impl Default for Feel {
-    fn default() -> Self { Feel::Average }
+    fn default() -> Self {
+        Feel::Average
+    }
 }
 
 #[derive(Default)]
@@ -76,7 +87,23 @@ struct Conditions {
 
 impl Conditions {
     fn validate(&self) -> Result<(), SimpleError> {
-        Ok(())
+        match self.weather {
+            Weather::Rain | Weather::HeavyRain => {
+                if self.temperature < 30 {
+                    Err(SimpleError::new("It's too cold for rain"))
+                } else {
+                    Ok(())
+                }
+            }
+            Weather::Snow => {
+                if self.temperature > 45 {
+                    Err(SimpleError::new("It's too warm for snow"))
+                } else {
+                    Ok(())
+                }
+            }
+            _ => Ok(()),
+        }
     }
 }
 
@@ -93,19 +120,60 @@ struct RunParameters {
     preferences: UserPreferences,
 }
 
-fn get_adjusted_temperature(params: RunParameters) -> i16 {
-    let temperature = params.conditions.temperature;
-    return temperature;
+impl RunParameters {
+    fn get_adjusted_temperature(&self) -> i16 {
+        // Adjust for weather
+        let weather_adj = match self.conditions.weather {
+            Weather::Snow => -3,
+            Weather::Rain => -4,
+            Weather::HeavyRain => -10,
+            Weather::Overcast => 0,
+            Weather::PartlyCloudy => match self.conditions.time {
+                TimeOfDay::Daytime => 5,
+                TimeOfDay::Morning | TimeOfDay::Evening => 2,
+                TimeOfDay::Night => 0,
+            },
+            Weather::Clear => match self.conditions.time {
+                TimeOfDay::Daytime => 10,
+                TimeOfDay::Morning | TimeOfDay::Evening => 5,
+                TimeOfDay::Night => 0,
+            },
+        };
+
+        // Adjust for wind
+        let wind_adj = match self.conditions.wind {
+            Wind::Light => -5,
+            Wind::Heavy => -9,
+            Wind::Calm => 0,
+        };
+
+        // Adjust for intensity
+        let intensity_adj = match self.preferences.intensity {
+            Intensity::Race => 15,
+            Intensity::Workout => 8,
+            Intensity::LongRun => -5,
+            Intensity::Average => 0,
+        };
+
+        // Adjust for user preference
+        let user_adj = match self.preferences.feel {
+            Feel::RunsWarm => 10,
+            Feel::RunsCold => -10,
+            Feel::Average => 0,
+        };
+
+        self.conditions.temperature + weather_adj + wind_adj + intensity_adj + user_adj
+    }
 }
 
 fn main() -> Result<(), SimpleError> {
     let mut params: RunParameters = Default::default();
+    params.conditions.weather = Weather::Rain;
     params.conditions.temperature = 50;
     params.conditions.validate()?;
 
-    let temp = get_adjusted_temperature(params);
-    println!("Temperature: {}", temp);
+    let temp = params.get_adjusted_temperature();
+    println!("Real temperature {}", params.conditions.temperature);
+    println!("Adjusted temperature: {}", temp);
     Ok(())
 }
-
-
