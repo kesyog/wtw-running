@@ -1,4 +1,4 @@
-use super::weather::{Intensity, RunParameters, Sex, Sky, TimeOfDay};
+use super::inputs::{Intensity, RunParameters, Sex, Weather, TimeOfDay};
 
 #[derive(Default, Clone, Copy)]
 struct Gear {
@@ -158,21 +158,21 @@ const SUNBLOCK: Gear = Gear {
 
 fn check_lower_heat_threshold_for_males(_gear: &Gear, params: &RunParameters) -> bool {
     match params.preferences.sex {
-        Sex::Male => params.conditions.temperature <= 80,
+        Sex::Male => params.get_adjusted_temperature() <= 80,
         Sex::Female => true,
     }
 }
 
 fn disallow_heavy_rain(_gear: &Gear, params: &RunParameters) -> bool {
-    match params.conditions.sky {
-        Sky::HeavyRain => false,
+    match params.conditions.weather {
+        Weather::HeavyRain => false,
         _ => true,
     }
 }
 
 fn require_rain(_gear: &Gear, params: &RunParameters) -> bool {
-    match params.conditions.sky {
-        Sky::HeavyRain | Sky::Rain => true,
+    match params.conditions.weather {
+        Weather::HeavyRain | Weather::Rain => true,
         _ => false,
     }
 }
@@ -181,8 +181,8 @@ fn require_sun(_gear: &Gear, params: &RunParameters) -> bool {
     if let TimeOfDay::Night = params.conditions.time {
         return false;
     }
-    match params.conditions.sky {
-        Sky::Clear | Sky::PartlyCloudy => true,
+    match params.conditions.weather {
+        Weather::Clear | Weather::PartlyCloudy => true,
         _ => false,
     }
 }
@@ -212,8 +212,8 @@ fn require_bright_sun(_gear: &Gear, params: &RunParameters) -> bool {
     if let TimeOfDay::Night = params.conditions.time {
         return false;
     }
-    match params.conditions.sky {
-        Sky::Clear | Sky::PartlyCloudy => true,
+    match params.conditions.weather {
+        Weather::Clear | Weather::PartlyCloudy => true,
         _ => false,
     }
 }
@@ -262,7 +262,7 @@ pub fn pick_outfit(params: &RunParameters) -> Outfit {
     // Special override for males running races
     if let Sex::Male = params.preferences.sex {
         if let Intensity::Race = params.preferences.intensity {
-            if params.conditions.temperature > 35 {
+            if params.get_adjusted_temperature() > 35 {
                 outfit.torso = vec![SINGLET.name];
             }
         }

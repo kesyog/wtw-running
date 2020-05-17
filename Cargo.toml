@@ -7,6 +7,9 @@ license = "MIT"
 homepage = "https://github.com/kesyog/wtw-running"
 repository = "https://github.com/kesyog/wtw-running"
 
+[profile.release]
+panic = "abort"
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]

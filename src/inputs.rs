@@ -1,7 +1,7 @@
 use simple_error::SimpleError;
 
 #[derive(Debug)]
-pub enum Sky {
+pub enum Weather {
     Clear,
     PartlyCloudy,
     Overcast,
@@ -10,9 +10,9 @@ pub enum Sky {
     Snow,
 }
 
-impl Default for Sky {
+impl Default for Weather {
     fn default() -> Self {
-        Sky::Clear
+        Weather::Clear
     }
 }
 
@@ -85,21 +85,24 @@ impl Default for Feel {
 
 #[derive(Default, Debug)]
 pub struct Conditions {
-    pub temperature: i16, // degrees F
-    pub sky: Sky,
+    // °F
+    temperature: i16,
+    // Temperature adjusted for conditions
+    adjusted_temperature: i16,
+    pub weather: Weather,
     pub wind: Wind,
     pub time: TimeOfDay,
 }
 
 impl Conditions {
     pub fn validate(&self) -> Result<(), SimpleError> {
-        match self.sky {
-            Sky::Rain | Sky::HeavyRain => {
+        match self.weather {
+            Weather::Rain | Weather::HeavyRain => {
                 if self.temperature < 30 {
                     return Err(SimpleError::new("It's too cold for rain"));
                 }
             }
-            Sky::Snow => {
+            Weather::Snow => {
                 if self.temperature > 45 {
                     return Err(SimpleError::new("It's too warm for snow"));
                 }
@@ -124,19 +127,19 @@ pub struct RunParameters {
 }
 
 impl RunParameters {
-    pub fn get_adjusted_temperature(&self) -> i16 {
-        // Adjust for sky conditions
-        let sky_adj = match self.conditions.sky {
-            Sky::Snow => -3,
-            Sky::Rain => -4,
-            Sky::HeavyRain => -10,
-            Sky::Overcast => 0,
-            Sky::PartlyCloudy => match self.conditions.time {
+    fn adjust_temperature(&self, actual_temperature: i16) -> i16 {
+        // Adjust for weather conditions
+        let weather_adj = match self.conditions.weather {
+            Weather::Snow => -3,
+            Weather::Rain => -4,
+            Weather::HeavyRain => -10,
+            Weather::Overcast => 0,
+            Weather::PartlyCloudy => match self.conditions.time {
                 TimeOfDay::Daytime => 5,
                 TimeOfDay::Morning | TimeOfDay::Evening => 2,
                 TimeOfDay::Night => 0,
             },
-            Sky::Clear => match self.conditions.time {
+            Weather::Clear => match self.conditions.time {
                 TimeOfDay::Daytime => 10,
                 TimeOfDay::Morning | TimeOfDay::Evening => 5,
                 TimeOfDay::Night => 0,
@@ -165,6 +168,15 @@ impl RunParameters {
             Feel::Average => 0,
         };
 
-        self.conditions.temperature + sky_adj + wind_adj + intensity_adj + user_adj
+        actual_temperature + weather_adj + wind_adj + intensity_adj + user_adj
+    }
+
+    pub fn set_temperature(&mut self, temperature: i16) {
+        self.conditions.temperature = temperature;
+        self.conditions.adjusted_temperature = self.adjust_temperature(temperature);
+    }
+
+    pub fn get_adjusted_temperature(&self) -> i16 {
+        self.conditions.adjusted_temperature
     }
 }
