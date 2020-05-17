@@ -121,7 +121,7 @@ const TIGHTS: Gear = Gear {
 
 const CAPRIS: Gear = Gear {
     name: "Capri tights",
-    min_temp: Some(35),
+    min_temp: Some(41),
     max_temp: Some(50),
     other_checks: Some(require_female),
 };
