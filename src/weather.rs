@@ -1,6 +1,7 @@
 use simple_error::SimpleError;
 
-pub enum Weather {
+#[derive(Debug)]
+pub enum Sky {
     Clear,
     PartlyCloudy,
     Overcast,
@@ -9,12 +10,13 @@ pub enum Weather {
     Snow,
 }
 
-impl Default for Weather {
+impl Default for Sky {
     fn default() -> Self {
-        Weather::Clear
+        Sky::Clear
     }
 }
 
+#[derive(Debug)]
 pub enum Wind {
     Calm,
     Light,
@@ -27,6 +29,7 @@ impl Default for Wind {
     }
 }
 
+#[derive(Debug)]
 pub enum TimeOfDay {
     Morning,
     Daytime,
@@ -40,6 +43,7 @@ impl Default for TimeOfDay {
     }
 }
 
+#[derive(Debug)]
 pub enum Sex {
     Male,
     Female,
@@ -52,6 +56,7 @@ impl Default for Sex {
     }
 }
 
+#[derive(Debug)]
 pub enum Intensity {
     LongRun,
     Average,
@@ -65,6 +70,7 @@ impl Default for Intensity {
     }
 }
 
+#[derive(Debug)]
 pub enum Feel {
     RunsWarm,
     Average,
@@ -77,23 +83,23 @@ impl Default for Feel {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct Conditions {
     pub temperature: i16, // degrees F
-    pub weather: Weather,
+    pub sky: Sky,
     pub wind: Wind,
     pub time: TimeOfDay,
 }
 
 impl Conditions {
     pub fn validate(&self) -> Result<(), SimpleError> {
-        match self.weather {
-            Weather::Rain | Weather::HeavyRain => {
+        match self.sky {
+            Sky::Rain | Sky::HeavyRain => {
                 if self.temperature < 30 {
                     return Err(SimpleError::new("It's too cold for rain"));
                 }
             }
-            Weather::Snow => {
+            Sky::Snow => {
                 if self.temperature > 45 {
                     return Err(SimpleError::new("It's too warm for snow"));
                 }
@@ -104,14 +110,14 @@ impl Conditions {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct UserPreferences {
     pub sex: Sex,
     pub intensity: Intensity,
     pub feel: Feel,
 }
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct RunParameters {
     pub conditions: Conditions,
     pub preferences: UserPreferences,
@@ -119,18 +125,18 @@ pub struct RunParameters {
 
 impl RunParameters {
     pub fn get_adjusted_temperature(&self) -> i16 {
-        // Adjust for weather
-        let weather_adj = match self.conditions.weather {
-            Weather::Snow => -3,
-            Weather::Rain => -4,
-            Weather::HeavyRain => -10,
-            Weather::Overcast => 0,
-            Weather::PartlyCloudy => match self.conditions.time {
+        // Adjust for sky conditions
+        let sky_adj = match self.conditions.sky {
+            Sky::Snow => -3,
+            Sky::Rain => -4,
+            Sky::HeavyRain => -10,
+            Sky::Overcast => 0,
+            Sky::PartlyCloudy => match self.conditions.time {
                 TimeOfDay::Daytime => 5,
                 TimeOfDay::Morning | TimeOfDay::Evening => 2,
                 TimeOfDay::Night => 0,
             },
-            Weather::Clear => match self.conditions.time {
+            Sky::Clear => match self.conditions.time {
                 TimeOfDay::Daytime => 10,
                 TimeOfDay::Morning | TimeOfDay::Evening => 5,
                 TimeOfDay::Night => 0,
@@ -159,6 +165,6 @@ impl RunParameters {
             Feel::Average => 0,
         };
 
-        self.conditions.temperature + weather_adj + wind_adj + intensity_adj + user_adj
+        self.conditions.temperature + sky_adj + wind_adj + intensity_adj + user_adj
     }
 }
