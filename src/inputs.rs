@@ -1,47 +1,4 @@
-use simple_error::SimpleError;
-
-#[derive(Debug)]
-pub enum Weather {
-    Clear,
-    PartlyCloudy,
-    Overcast,
-    Rain,
-    HeavyRain,
-    Snow,
-}
-
-impl Default for Weather {
-    fn default() -> Self {
-        Weather::Clear
-    }
-}
-
-#[derive(Debug)]
-pub enum Wind {
-    Calm,
-    Light,
-    Heavy,
-}
-
-impl Default for Wind {
-    fn default() -> Self {
-        Wind::Calm
-    }
-}
-
-#[derive(Debug)]
-pub enum TimeOfDay {
-    Morning,
-    Daytime,
-    Evening,
-    Night,
-}
-
-impl Default for TimeOfDay {
-    fn default() -> Self {
-        TimeOfDay::Daytime
-    }
-}
+use super::weather::{Conditions, TimeOfDay, Weather, Wind};
 
 #[derive(Debug)]
 pub enum Sex {
@@ -84,36 +41,6 @@ impl Default for Feel {
 }
 
 #[derive(Default, Debug)]
-pub struct Conditions {
-    // °F
-    temperature: i16,
-    // Temperature adjusted for conditions
-    adjusted_temperature: i16,
-    pub weather: Weather,
-    pub wind: Wind,
-    pub time: TimeOfDay,
-}
-
-impl Conditions {
-    pub fn validate(&self) -> Result<(), SimpleError> {
-        match self.weather {
-            Weather::Rain | Weather::HeavyRain => {
-                if self.temperature < 30 {
-                    return Err(SimpleError::new("It's too cold for rain"));
-                }
-            }
-            Weather::Snow => {
-                if self.temperature > 45 {
-                    return Err(SimpleError::new("It's too warm for snow"));
-                }
-            }
-            _ => (),
-        };
-        Ok(())
-    }
-}
-
-#[derive(Default, Debug)]
 pub struct UserPreferences {
     pub sex: Sex,
     pub intensity: Intensity,
@@ -127,7 +54,7 @@ pub struct RunParameters {
 }
 
 impl RunParameters {
-    fn adjust_temperature(&self, actual_temperature: i16) -> i16 {
+    pub fn adjust_temperature(&mut self) -> &RunParameters {
         // Adjust for weather conditions
         let weather_adj = match self.conditions.weather {
             Weather::Snow => -3,
@@ -168,15 +95,7 @@ impl RunParameters {
             Feel::Average => 0,
         };
 
-        actual_temperature + weather_adj + wind_adj + intensity_adj + user_adj
-    }
-
-    pub fn set_temperature(&mut self, temperature: i16) {
-        self.conditions.temperature = temperature;
-        self.conditions.adjusted_temperature = self.adjust_temperature(temperature);
-    }
-
-    pub fn get_adjusted_temperature(&self) -> i16 {
-        self.conditions.adjusted_temperature
+        self.conditions.adjusted_temperature = self.conditions.temperature + weather_adj + wind_adj + intensity_adj + user_adj;
+        self
     }
 }

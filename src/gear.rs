@@ -1,4 +1,5 @@
-use super::inputs::{Intensity, RunParameters, Sex, Weather, TimeOfDay};
+use super::inputs::{Intensity, RunParameters, Sex};
+use super::weather::{TimeOfDay, Weather};
 
 #[derive(Default, Clone, Copy)]
 struct Gear {
@@ -15,7 +16,7 @@ impl Gear {
             assert!(max_temp >= min_temp);
         }
         // Check if current temperature is within acceptable range for this gear
-        let adjusted_temperature = params.get_adjusted_temperature();
+        let adjusted_temperature = params.conditions.adjusted_temperature;
         if let Some(max_temp) = self.max_temp {
             if adjusted_temperature > max_temp {
                 return false;
@@ -158,7 +159,7 @@ const SUNBLOCK: Gear = Gear {
 
 fn check_lower_heat_threshold_for_males(_gear: &Gear, params: &RunParameters) -> bool {
     match params.preferences.sex {
-        Sex::Male => params.get_adjusted_temperature() <= 80,
+        Sex::Male => params.conditions.adjusted_temperature <= 80,
         Sex::Female => true,
     }
 }
@@ -262,7 +263,7 @@ pub fn pick_outfit(params: &RunParameters) -> Outfit {
     // Special override for males running races
     if let Sex::Male = params.preferences.sex {
         if let Intensity::Race = params.preferences.intensity {
-            if params.get_adjusted_temperature() > 35 {
+            if params.conditions.adjusted_temperature > 35 {
                 outfit.torso = vec![SINGLET.name];
             }
         }
