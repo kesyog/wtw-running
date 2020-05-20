@@ -2,10 +2,9 @@ mod gear;
 mod inputs;
 mod weather;
 
-use openweather::LocationSpecifier;
 use inputs::{Feel, Intensity, Sex};
+use openweather::LocationSpecifier;
 use simple_error::SimpleError;
-use weather::{Conditions, TimeOfDay, Weather, Wind};
 
 fn main() -> Result<(), SimpleError> {
     dotenv::dotenv().ok();
@@ -26,11 +25,7 @@ fn main() -> Result<(), SimpleError> {
 
     println!("Parameters: {:?}", params);
     let outfit = gear::pick_outfit(&params);
-    println!(
-        "{}°F Feels like {}°F {:?}",
-        params.conditions.temperature,
-        params.conditions.adjusted_temperature,
-        outfit
-    );
+    // TODO: pretty print
+    println!("{:?}", outfit);
     Ok(())
 }

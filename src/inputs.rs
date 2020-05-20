@@ -95,7 +95,8 @@ impl RunParameters {
             Feel::Average => 0,
         };
 
-        self.conditions.adjusted_temperature = self.conditions.temperature + weather_adj + wind_adj + intensity_adj + user_adj;
+        self.conditions.adjusted_temperature =
+            self.conditions.temperature + weather_adj + wind_adj + intensity_adj + user_adj;
         self
     }
 }

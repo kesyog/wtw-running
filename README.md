@@ -1,5 +1,5 @@
 # 🎽 What to wear running
-Recommends a running outfit for you based on weather conditions partially pulled from OpenWeatherMap
+Recommends a running outfit for you based on weather conditions pulled from [OpenWeatherMap](https://openweathermap.org)
 and user preferences.
 
 Gear data ripped off from a flaky [Runner's World page](https://www.runnersworld.com/training/a20803133/what-to-wear/)
@@ -16,8 +16,7 @@ OWM_API_KEY=<API key goes here> cargo run --release
 ## Todo
 Super WIP
 
-- Resolve weather conditions from OpenWeatherMap data
 - Don't hard-code user preferences or location
-- Tests
+- Unit tests
 - Host on [AWS Lambda](https://github.com/awslabs/aws-lambda-rust-runtime)
 - Make an Alexa skill
