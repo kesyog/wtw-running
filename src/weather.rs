@@ -1,5 +1,5 @@
+use anyhow::{anyhow, Result};
 use openweather::{Language, LocationSpecifier, Settings, Unit, WeatherReportCurrent};
-use simple_error::SimpleError;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 #[derive(Debug)]
@@ -56,16 +56,16 @@ pub struct Conditions {
 }
 
 impl Conditions {
-    fn validate(&self) -> Result<(), SimpleError> {
+    fn validate(&self) -> Result<()> {
         match self.weather {
             Weather::Rain | Weather::HeavyRain => {
                 if self.temperature < 30 {
-                    return Err(SimpleError::new("It's too cold for rain"));
+                    return Err(anyhow!("It's too cold for rain"));
                 }
             }
             Weather::Snow => {
                 if self.temperature > 45 {
-                    return Err(SimpleError::new("It's too warm for snow"));
+                    return Err(anyhow!("It's too warm for snow"));
                 }
             }
             _ => (),
@@ -129,10 +129,7 @@ fn resolve_weather(weather: &WeatherReportCurrent) -> Weather {
     }
 }
 
-pub fn get_current_weather(
-    owm_api_key: &str,
-    loc: &LocationSpecifier,
-) -> Result<Conditions, SimpleError> {
+pub fn get_current_weather(owm_api_key: &str, loc: &LocationSpecifier) -> Result<Conditions> {
     let settings: Settings = Settings {
         unit: Some(Unit::Imperial),
         lang: Some(Language::English),

@@ -2,11 +2,11 @@ mod gear;
 mod inputs;
 mod weather;
 
+use anyhow::Result;
 use inputs::{Feel, Intensity, Sex};
 use openweather::LocationSpecifier;
-use simple_error::SimpleError;
 
-fn main() -> Result<(), SimpleError> {
+fn main() -> Result<()> {
     dotenv::dotenv().ok();
     let owm_api_key = dotenv::var("OWM_API_KEY").expect("No OpenWeatherMap API key provided");
 
