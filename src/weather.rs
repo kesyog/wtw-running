@@ -108,15 +108,12 @@ fn resolve_weather(weather: &WeatherReportCurrent) -> Weather {
 
     // Check for precipitation
     for weather_item in &weather.weather {
-        if weather_item.id / 100 == 6 {
-            return Weather::Snow;
-        } else if weather_item.id / 100 == 5 {
-            // Check if weather id matches OpenWeatherMap light rain types
-            if [500, 501, 520].contains(&weather_item.id) {
-                return Weather::Rain;
-            } else {
-                return Weather::HeavyRain;
-            }
+        match weather_item.id {
+            600..=699 => return Weather::Snow,
+            500 | 501 | 520 => return Weather::Rain,
+            #[allow(overlapping_patterns)]
+            500..=599 => return Weather::HeavyRain,
+            _ => (),
         }
     }
     // No precipitation. Can use % cloud cover to determine weather
