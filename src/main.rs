@@ -3,7 +3,7 @@ mod inputs;
 mod weather;
 
 use anyhow::Result;
-use inputs::{Feel, Intensity, Sex};
+use inputs::{RunParameters, UserPreferences};
 use openweather::LocationSpecifier;
 
 fn main() -> Result<()> {
@@ -16,12 +16,8 @@ fn main() -> Result<()> {
     };
 
     let conditions = weather::get_current_weather(&owm_api_key, &loc).unwrap();
-
-    let mut params: inputs::RunParameters = inputs::RunParameters {
-        conditions,
-        ..Default::default()
-    };
-    params.adjust_temperature();
+    let preferences = UserPreferences::default();
+    let params = RunParameters::new(conditions, preferences);
 
     println!("Parameters: {:?}", params);
     let outfit = gear::pick_outfit(&params);

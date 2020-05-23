@@ -49,7 +49,6 @@ impl Default for TimeOfDay {
 pub struct Conditions {
     // Temperature in units (°F)
     pub temperature: i16,
-    pub adjusted_temperature: i16,
     pub weather: Weather,
     pub wind: Wind,
     pub time: TimeOfDay,
@@ -153,7 +152,6 @@ pub fn get_current_weather(owm_api_key: &str, loc: &LocationSpecifier) -> Result
 
     let conditions: Conditions = Conditions {
         temperature: weather.main.temp as i16,
-        adjusted_temperature: weather.main.temp as i16,
         wind: resolve_wind(&weather),
         time: resolve_time_of_day(&weather),
         weather: resolve_weather(&weather),

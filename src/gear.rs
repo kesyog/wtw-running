@@ -7,7 +7,7 @@ struct Gear {
     max_temp: Option<i16>,
     min_temp: Option<i16>,
     // Function should return true if gear is acceptable
-    other_checks: Option<fn(&Gear, &RunParameters) -> bool>,
+    other_checks: Option<fn(&Self, &RunParameters) -> bool>,
 }
 
 impl Gear {
@@ -16,14 +16,14 @@ impl Gear {
             assert!(max_temp >= min_temp);
         }
         // Check if current temperature is within acceptable range for this gear
-        let adjusted_temperature = params.conditions.adjusted_temperature;
+        let effective_temperature = params.effective_temperature();
         if let Some(max_temp) = self.max_temp {
-            if adjusted_temperature > max_temp {
+            if effective_temperature > max_temp {
                 return false;
             }
         }
         if let Some(min_temp) = self.min_temp {
-            if adjusted_temperature < min_temp {
+            if effective_temperature < min_temp {
                 return false;
             }
         }
@@ -159,7 +159,7 @@ const SUNBLOCK: Gear = Gear {
 
 fn check_lower_heat_threshold_for_males(_gear: &Gear, params: &RunParameters) -> bool {
     match params.preferences.sex {
-        Sex::Male => params.conditions.adjusted_temperature <= 80,
+        Sex::Male => params.effective_temperature() <= 80,
         Sex::Female => true,
     }
 }
@@ -263,7 +263,7 @@ pub fn pick_outfit(params: &RunParameters) -> Outfit {
     // Special override for males running races
     if let Sex::Male = params.preferences.sex {
         if let Intensity::Race = params.preferences.intensity {
-            if params.conditions.adjusted_temperature > 35 {
+            if params.effective_temperature() > 35 {
                 outfit.torso = vec![SINGLET.name];
             }
         }
