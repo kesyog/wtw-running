@@ -1,5 +1,6 @@
 use super::inputs::{Intensity, RunParameters, Sex};
 use super::weather::{TimeOfDay, Weather};
+use std::fmt;
 
 #[derive(Default, Clone, Copy)]
 struct Gear {
@@ -234,6 +235,27 @@ pub struct Outfit {
     pub legs: Vec<&'static str>,
     pub feet: Vec<&'static str>,
     pub accessories: Vec<&'static str>,
+}
+
+impl fmt::Display for Outfit {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        if !self.head.is_empty() {
+            writeln!(f, "{}", self.head.join(", "))?;
+        }
+        if !self.torso.is_empty() {
+            writeln!(f, "{}", self.torso.join(", "))?;
+        }
+        if !self.legs.is_empty() {
+            writeln!(f, "{}", self.legs.join(", "))?;
+        }
+        if !self.feet.is_empty() {
+            writeln!(f, "{}", self.feet.join(", "))?;
+        }
+        if !self.accessories.is_empty() {
+            writeln!(f, "{}", self.accessories.join(", "))?;
+        }
+        Ok(())
+    }
 }
 
 pub fn pick_outfit(params: &RunParameters) -> Outfit {

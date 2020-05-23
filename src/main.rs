@@ -19,9 +19,7 @@ fn main() -> Result<()> {
     let preferences = UserPreferences::default();
     let params = RunParameters::new(conditions, preferences);
 
-    println!("Parameters: {:?}", params);
     let outfit = gear::pick_outfit(&params);
-    // TODO: pretty print
-    println!("{:?}", outfit);
+    println!("\nParameters:\n{}\n\nOutfit:\n{}", params, outfit);
     Ok(())
 }

@@ -1,5 +1,6 @@
 use anyhow::{anyhow, Result};
 use openweather::{Language, LocationSpecifier, Settings, Unit, WeatherReportCurrent};
+use std::fmt;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 #[derive(Debug)]
@@ -73,6 +74,17 @@ impl Conditions {
     }
 }
 
+// TODO: pretty print
+impl fmt::Display for Conditions {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "{}°F @ {:?}\n{:?} with {:?} wind",
+            self.temperature, self.time, self.weather, self.wind
+        )
+    }
+}
+
 fn resolve_wind(weather: &WeatherReportCurrent) -> Wind {
     let wind_speed = weather.wind.speed;
     if wind_speed < 8.0 {
@@ -138,20 +150,15 @@ pub fn get_current_weather(owm_api_key: &str, loc: &LocationSpecifier) -> Result
         .duration_since(forecast_time)
         .unwrap()
         .as_secs();
+
+    // TODO: what loggers are out there?
     println!(
-        "As of {} minutes ago, in Somerville, MA it is {:0.0}°F",
-        freshness_sec / 60,
-        weather.main.temp
+        "Fetched OpenWeatherMap data from {} minutes ago",
+        freshness_sec / 60
     );
-    for weather_item in &weather.weather {
-        println!(
-            "Weather: {}: {}",
-            weather_item.main, weather_item.description
-        );
-    }
 
     let conditions: Conditions = Conditions {
-        temperature: weather.main.temp as i16,
+        temperature: weather.main.temp.round() as i16,
         wind: resolve_wind(&weather),
         time: resolve_time_of_day(&weather),
         weather: resolve_weather(&weather),

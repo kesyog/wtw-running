@@ -14,8 +14,6 @@ OWM_API_KEY=<API key goes here> cargo run --release
 ```
 
 ## Todo
-Super WIP
-
 - Don't hard-code user preferences or location
 - Unit tests
 - Host on [AWS Lambda](https://github.com/awslabs/aws-lambda-rust-runtime)

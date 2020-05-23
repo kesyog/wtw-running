@@ -1,4 +1,5 @@
 use super::weather::{Conditions, TimeOfDay, Weather, Wind};
+use std::fmt;
 
 #[derive(Debug)]
 pub enum Sex {
@@ -45,6 +46,16 @@ pub struct UserPreferences {
     pub sex: Sex,
     pub intensity: Intensity,
     pub feel: Feel,
+}
+
+impl fmt::Display for UserPreferences {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?} running @ {:?} intensity", self.sex, self.intensity)?;
+        match &self.feel {
+            Feel::Average => Ok(()),
+            _ => write!(f, "{:?}", self.feel),
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -114,5 +125,11 @@ impl RunParameters {
         };
 
         conditions.temperature + weather_adj + wind_adj + intensity_adj + user_adj
+    }
+}
+
+impl fmt::Display for RunParameters {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}\n{}", self.preferences, self.conditions)
     }
 }
