@@ -1,5 +1,6 @@
 use super::inputs::{Intensity, RunParameters, Sex};
 use super::weather::{TimeOfDay, Weather};
+use anyhow::{anyhow, Result};
 use std::fmt;
 
 #[derive(Default, Clone, Copy)]
@@ -14,7 +15,7 @@ struct Gear {
 impl Gear {
     fn is_wearable(&self, params: &RunParameters) -> bool {
         if let (Some(max_temp), Some(min_temp)) = (self.max_temp, self.min_temp) {
-            assert!(max_temp >= min_temp);
+            debug_assert!(max_temp >= min_temp);
         }
         // Check if current temperature is within acceptable range for this gear
         let effective_temperature = params.effective_temperature();
@@ -258,7 +259,7 @@ impl fmt::Display for Outfit {
     }
 }
 
-pub fn pick_outfit(params: &RunParameters) -> Outfit {
+pub fn pick_outfit(params: &RunParameters) -> Result<Outfit> {
     let head = vec![&WINTER_CAP, &HAT];
     let torso = vec![
         &HEAVY_JACKET,
@@ -291,8 +292,9 @@ pub fn pick_outfit(params: &RunParameters) -> Outfit {
         }
     }
 
-    assert!(!outfit.torso.is_empty());
-    assert!(!outfit.legs.is_empty());
-    assert!(!outfit.feet.is_empty());
-    outfit
+    if outfit.torso.is_empty() || outfit.legs.is_empty() || outfit.feet.is_empty() {
+        Err(anyhow!("Invalid outfit {}", outfit))
+    } else {
+        Ok(outfit)
+    }
 }

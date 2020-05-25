@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, Context, Result};
 use openweather::{Language, LocationSpecifier, Settings, Unit, WeatherReportCurrent};
 use std::fmt;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
@@ -144,12 +144,9 @@ pub fn get_current_weather(owm_api_key: &str, loc: &LocationSpecifier) -> Result
     };
 
     let weather = openweather::get_current_weather(loc, owm_api_key, &settings)
-        .expect("Problem fetching current weather");
+        .with_context(|| "Failed to fetch the weather")?;
     let forecast_time = UNIX_EPOCH + Duration::from_secs(weather.dt);
-    let freshness_sec = SystemTime::now()
-        .duration_since(forecast_time)
-        .unwrap()
-        .as_secs();
+    let freshness_sec = SystemTime::now().duration_since(forecast_time)?.as_secs();
 
     // TODO: what loggers are out there?
     println!(
