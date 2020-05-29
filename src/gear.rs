@@ -221,11 +221,11 @@ fn require_bright_sun(_gear: &Gear, params: &RunParameters) -> bool {
     }
 }
 
-fn get_wearable_items<'a>(choices: Vec<&'a Gear>, params: &RunParameters) -> Vec<&'a str> {
+fn filter_wearable<'a>(choices: &[&'a Gear], params: &RunParameters) -> Vec<&'a str> {
     choices
         .iter()
-        .filter(|&x| x.is_wearable(params))
-        .map(|&x| x.name)
+        .filter(|x| x.is_wearable(params))
+        .map(|x| x.name)
         .collect()
 }
 
@@ -259,42 +259,44 @@ impl fmt::Display for Outfit {
     }
 }
 
-pub fn pick_outfit(params: &RunParameters) -> Result<Outfit> {
-    let head = vec![&WINTER_CAP, &HAT];
-    let torso = vec![
-        &HEAVY_JACKET,
-        &LIGHT_JACKET,
-        &VEST,
-        &LONG_SLEEVE,
-        &SHORT_SLEEVE,
-        &SINGLET,
-        &SPORTS_BRA,
-        &TOPLESS,
-    ];
-    let legs = vec![&TIGHTS, &CAPRIS, &SHORTS];
-    let feet = vec![&SHOES];
-    let accessories = vec![&GLOVES, &SUNGLASSES, &SUNBLOCK];
+impl Outfit {
+    pub fn new(params: &RunParameters) -> Result<Outfit> {
+        let head_options = vec![&WINTER_CAP, &HAT];
+        let torso_options = vec![
+            &HEAVY_JACKET,
+            &LIGHT_JACKET,
+            &VEST,
+            &LONG_SLEEVE,
+            &SHORT_SLEEVE,
+            &SINGLET,
+            &SPORTS_BRA,
+            &TOPLESS,
+        ];
+        let legs_options = vec![&TIGHTS, &CAPRIS, &SHORTS];
+        let feet_options = vec![&SHOES];
+        let accessories_options = vec![&GLOVES, &SUNGLASSES, &SUNBLOCK];
 
-    let mut outfit = Outfit {
-        head: get_wearable_items(head, &params),
-        torso: get_wearable_items(torso, &params),
-        legs: get_wearable_items(legs, &params),
-        feet: get_wearable_items(feet, &params),
-        accessories: get_wearable_items(accessories, &params),
-    };
+        let mut outfit = Outfit {
+            head: filter_wearable(&head_options, &params),
+            torso: filter_wearable(&torso_options, &params),
+            legs: filter_wearable(&legs_options, &params),
+            feet: filter_wearable(&feet_options, &params),
+            accessories: filter_wearable(&accessories_options, &params),
+        };
 
-    // Special override for males running races
-    if let Sex::Male = params.preferences.sex {
-        if let Intensity::Race = params.preferences.intensity {
-            if params.effective_temperature() > 35 {
-                outfit.torso = vec![SINGLET.name];
+        // Special override for males running races
+        if let Sex::Male = params.preferences.sex {
+            if let Intensity::Race = params.preferences.intensity {
+                if params.effective_temperature() > 35 {
+                    outfit.torso = vec![SINGLET.name];
+                }
             }
         }
-    }
 
-    if outfit.torso.is_empty() || outfit.legs.is_empty() || outfit.feet.is_empty() {
-        Err(anyhow!("Invalid outfit {}", outfit))
-    } else {
-        Ok(outfit)
+        if outfit.torso.is_empty() || outfit.legs.is_empty() || outfit.feet.is_empty() {
+            Err(anyhow!("Invalid outfit {}", outfit))
+        } else {
+            Ok(outfit)
+        }
     }
 }

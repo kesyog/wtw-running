@@ -137,7 +137,7 @@ fn resolve_weather(weather: &WeatherReportCurrent) -> Weather {
     }
 }
 
-pub fn get_current_weather(owm_api_key: &str, loc: &LocationSpecifier) -> Result<Conditions> {
+pub fn get_current(owm_api_key: &str, loc: &LocationSpecifier) -> Result<Conditions> {
     let settings: Settings = Settings {
         unit: Some(Unit::Imperial),
         lang: Some(Language::English),
