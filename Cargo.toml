@@ -1,19 +1,9 @@
-[package]
-name = "wtw-running"
-version = "0.1.0"
-authors = ["Kesavan Yogeswaran <kesyog@gmail.com>"]
-edition = "2018"
-license = "MIT"
-homepage = "https://github.com/kesyog/wtw-running"
-repository = "https://github.com/kesyog/wtw-running"
+[workspace]
+members = [
+  "cli",
+  "picker",
+]
 
 [profile.release]
 panic = "abort"
 lto = true
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
-anyhow = "1.0"
-openweather = { git = "https://github.com/kesyog/openweather"}
-dotenv = "0.15.0"

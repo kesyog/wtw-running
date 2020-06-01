@@ -10,7 +10,8 @@ re-familiarize myself with basic Rust syntax and concepts.
 
 ## Usage
 ```
-OWM_API_KEY=<API key goes here> cargo run --release
+cargo build --release
+OWM_API_KEY=<API key goes here> target/release/wtwr
 ```
 
 ## Todo
