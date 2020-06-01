@@ -1,0 +1,23 @@
+[package]
+name = "wtw-running-cli"
+description = "CLI tool to pick a running outfit based on the current weather"
+version = "0.1.0"
+authors = ["Kesavan Yogeswaran <kesyog@gmail.com>"]
+license = "MIT"
+edition = "2018"
+homepage = "https://github.com/kesyog/wtw-running/cli"
+repository = "https://github.com/kesyog/wtw-running"
+
+[[bin]]
+name = "wtwr"
+path = "src/main.rs"
+
+[features]
+# Allow specifying OpenWeatherMap API key via an .env file
+dotenv_key = ["dotenv"]
+
+[dependencies]
+picker = { path = "../picker" }
+anyhow = "1.*"
+openweather = { git = "https://github.com/caemor/openweather"}
+dotenv = { version = "0.15.0", optional = true }
