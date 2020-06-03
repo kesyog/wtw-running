@@ -1,12 +1,19 @@
 [package]
-name = "picker"
-description = "Common functions to get the weather and pick an outfit"
+name = "skill"
 version = "0.1.0"
 authors = ["Kesavan Yogeswaran <kesyog@gmail.com>"]
 edition = "2018"
+autobins = false
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[[bin]]
+name = "bootstrap"
+path = "src/main.rs"
 
 [dependencies]
+picker = { path = "../picker" }
+alexa_sdk = "^0.1.5"
+lambda_runtime="^0.2.1"
 anyhow = "^1.0"
 openweather = { git = "https://github.com/caemor/openweather"}
+simple_logger = "^1"
+log = "^0.4"
