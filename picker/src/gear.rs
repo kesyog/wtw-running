@@ -39,119 +39,119 @@ impl Gear {
 
 // Gear options
 const WINTER_CAP: Gear = Gear {
-    name: "Winter cap",
+    name: "a winter cap",
     min_temp: None,
     max_temp: Some(38),
     other_checks: Some(disallow_heavy_rain),
 };
 
 const HAT: Gear = Gear {
-    name: "Hat with visor",
+    name: "a hat with visor",
     min_temp: None,
     max_temp: None,
     other_checks: Some(require_rain),
 };
 
 const SUNGLASSES: Gear = Gear {
-    name: "Sunglasses",
+    name: "sunglasses",
     min_temp: None,
     max_temp: None,
     other_checks: Some(require_sun),
 };
 
 const HEAVY_JACKET: Gear = Gear {
-    name: "Heavy jacket",
+    name: "a heavy jacket",
     min_temp: None,
     max_temp: Some(20),
     other_checks: None,
 };
 
 const LIGHT_JACKET: Gear = Gear {
-    name: "Light jacket",
+    name: "a light jacket",
     min_temp: Some(21),
     max_temp: Some(35),
     other_checks: None,
 };
 
 const VEST: Gear = Gear {
-    name: "Vest",
+    name: "a vest",
     min_temp: Some(36),
     max_temp: Some(40),
     other_checks: None,
 };
 
 const LONG_SLEEVE: Gear = Gear {
-    name: "Long-sleeve shirt",
+    name: "a long-sleeved shirt",
     min_temp: None,
     max_temp: Some(54),
     other_checks: None,
 };
 
 const SHORT_SLEEVE: Gear = Gear {
-    name: "Short-sleeve shirt",
+    name: "a short-sleeved shirt",
     min_temp: Some(55),
     max_temp: Some(65),
     other_checks: None,
 };
 
 const SINGLET: Gear = Gear {
-    name: "Singlet",
+    name: "a sleeveless shirt",
     min_temp: Some(66),
     max_temp: Some(85),
     other_checks: Some(check_lower_heat_threshold_for_males),
 };
 
 const SPORTS_BRA: Gear = Gear {
-    name: "Sports bra",
+    name: "a sports bra",
     min_temp: None,
     max_temp: None,
     other_checks: Some(require_female),
 };
 
 const TOPLESS: Gear = Gear {
-    name: "Topless",
+    name: "no shirt",
     min_temp: Some(81),
     max_temp: None,
     other_checks: Some(require_male),
 };
 
 const TIGHTS: Gear = Gear {
-    name: "Tights",
+    name: "tights",
     min_temp: None,
     max_temp: Some(40),
     other_checks: None,
 };
 
 const CAPRIS: Gear = Gear {
-    name: "Capri tights",
+    name: "capri tights",
     min_temp: Some(41),
     max_temp: Some(50),
     other_checks: Some(require_female),
 };
 
 const SHORTS: Gear = Gear {
-    name: "Shorts",
+    name: "shorts",
     min_temp: Some(40),
     max_temp: None,
     other_checks: None,
 };
 
 const GLOVES: Gear = Gear {
-    name: "Gloves",
+    name: "gloves",
     min_temp: None,
     max_temp: Some(47),
     other_checks: Some(disallow_races),
 };
 
 const SHOES: Gear = Gear {
-    name: "Running shoes",
+    name: "running shoes",
     min_temp: None,
     max_temp: None,
     other_checks: None,
 };
 
 const SUNBLOCK: Gear = Gear {
-    name: "Sunblock",
+    name: "sunblock",
     min_temp: None,
     max_temp: None,
     other_checks: Some(require_bright_sun),

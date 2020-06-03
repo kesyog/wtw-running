@@ -2,6 +2,7 @@
 members = [
   "cli",
   "picker",
+  "skill",
 ]
 
 [profile.release]

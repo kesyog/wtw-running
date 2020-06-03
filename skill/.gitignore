@@ -1,0 +1,3 @@
+# build artifacts from build.sh
+bootstrap
+rust.zip
