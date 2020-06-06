@@ -1,8 +1,6 @@
 use alexa_sdk::request::IntentType;
 use alexa_sdk::{Request, Response};
-use anyhow::{anyhow, Result};
-use lambda::{error::HandlerError, lambda, Context};
-use lambda_runtime as lambda;
+use anyhow::anyhow;
 use log::info;
 use openweather::LocationSpecifier;
 use picker::{
@@ -10,8 +8,9 @@ use picker::{
     inputs::{RunParameters, UserPreferences},
     weather,
 };
-use std::error::Error;
 use std::fmt::Write;
+
+type Error = Box<dyn std::error::Error + Send + Sync + 'static>;
 
 // Flatten a collection of strings into a single string, adding in commas as necessary, and adding
 // "and" before the last item.
@@ -24,7 +23,7 @@ fn join_english_list(items: &[&str]) -> String {
     }
 }
 
-fn get_outfit() -> Result<String> {
+fn get_outfit() -> Result<String, Error> {
     let owm_api_key = std::env::var("OWM_API_KEY")
         .or_else(|_| Err(anyhow!("No OpenWeatherMap API key provided")))?;
 
@@ -69,25 +68,24 @@ fn get_outfit() -> Result<String> {
     Ok(speech.trim().to_string())
 }
 
-fn outfit_intent_handler(_req: &Request) -> Result<Response, HandlerError> {
-    let speech = get_outfit()
-        .or_else::<HandlerError, _>(|_| Ok("I had trouble finding you an outfit".to_string()))?;
+fn outfit_intent_handler(_req: &Request) -> Result<Response, Error> {
+    let speech = get_outfit().map_err(|_| anyhow!("I had trouble finding you an outfit"))?;
     info!("Recommending outfit: {}", speech);
     Ok(Response::simple("Outfit", &speech))
 }
 
-fn handle_help(_req: &Request) -> Result<Response, HandlerError> {
+fn handle_help(_req: &Request) -> Result<Response, Error> {
     Ok(Response::simple(
         "Help",
         "Outfit Picker can help you pick a running outfit. Try saying \"find me an outfit\".",
     ))
 }
 
-fn handle_cancel(_req: &Request) -> Result<Response, HandlerError> {
+fn handle_cancel(_req: &Request) -> Result<Response, Error> {
     Ok(Response::end())
 }
 
-fn my_handler(req: Request, _ctx: Context) -> Result<Response, HandlerError> {
+async fn my_handler(req: Request) -> Result<Response, Error> {
     match req.intent() {
         IntentType::Help => handle_help(&req),
         IntentType::Cancel => handle_cancel(&req),
@@ -97,9 +95,11 @@ fn my_handler(req: Request, _ctx: Context) -> Result<Response, HandlerError> {
     }
 }
 
-fn main() -> Result<(), Box<dyn Error>> {
+#[tokio::main]
+async fn main() -> Result<(), Error> {
     simple_logger::init_with_level(log::Level::Info).unwrap();
-    lambda!(my_handler);
+    let handler = lambda::handler_fn(my_handler);
+    lambda::run(handler).await?;
 
     Ok(())
 }
