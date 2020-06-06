@@ -1,7 +1,7 @@
 use super::weather::{Conditions, TimeOfDay, Weather, Wind};
 use std::fmt;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Sex {
     Male,
     Female,
@@ -14,7 +14,7 @@ impl Default for Sex {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Intensity {
     LongRun,
     Average,
@@ -28,7 +28,7 @@ impl Default for Intensity {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Feel {
     RunsWarm,
     Average,
@@ -41,7 +41,7 @@ impl Default for Feel {
     }
 }
 
-#[derive(Default, Debug)]
+#[derive(Default, Debug, Clone)]
 pub struct UserPreferences {
     pub sex: Sex,
     pub intensity: Intensity,
@@ -66,12 +66,11 @@ pub struct RunParameters {
 }
 
 impl RunParameters {
-    pub fn new(conditions: Conditions, preferences: UserPreferences) -> RunParameters {
-        let effective_temperature =
-            Self::calculate_effective_temperature(&conditions, &preferences);
+    pub fn new(conditions: &Conditions, preferences: &UserPreferences) -> RunParameters {
+        let effective_temperature = Self::calculate_effective_temperature(conditions, preferences);
         RunParameters {
-            conditions,
-            preferences,
+            conditions: conditions.clone(),
+            preferences: preferences.clone(),
             effective_temperature,
         }
     }

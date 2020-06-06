@@ -16,7 +16,7 @@ fn main() -> Result<()> {
 
     let conditions = weather::get_current(&owm_api_key, &loc)?;
     let preferences = UserPreferences::default();
-    let params = RunParameters::new(conditions, preferences);
+    let params = RunParameters::new(&conditions, &preferences);
 
     let outfit = Outfit::new(&params)?;
     println!("\nParameters:\n{}\n\nOutfit:\n{}", params, outfit);

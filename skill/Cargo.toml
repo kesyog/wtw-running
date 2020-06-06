@@ -11,10 +11,20 @@ path = "src/main.rs"
 
 [dependencies]
 picker = { path = "../picker" }
-alexa_sdk = "^0.1.5"
-lambda = { git = "https://github.com/awslabs/aws-lambda-rust-runtime" }
+lambda = { git = "https://github.com/awslabs/aws-lambda-rust-runtime", rev = "ed3fd167528125b73ce47abfadc38cd274bf59bc" }
+alexa_sdk = { git = "https://github.com/kesyog/alexa_rust", branch = "kyogeswaran/geolocation-interface" }
 anyhow = "^1.0"
 openweather = { git = "https://github.com/caemor/openweather"}
 simple_logger = "^1"
 log = "^0.4"
 tokio = { version = "^0.2", features = ["full"] }
+serde = "^1"
+serde_json = "^1"
+serde_derive = "^1"
+
+[dependencies.reqwest]
+version = "^0.10"
+# Disable default-tls as it depends on OpenSSL, which would require some additional digging to work
+# with the musl target
+default-features = false
+features = ["blocking", "rustls-tls"]

@@ -1,9 +1,10 @@
 use anyhow::{anyhow, Context, Result};
+use log::debug;
 use openweather::{Language, LocationSpecifier, Settings, Unit, WeatherReportCurrent};
 use std::fmt;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Weather {
     Clear,
     PartlyCloudy,
@@ -19,7 +20,7 @@ impl Default for Weather {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Wind {
     Calm,
     Light,
@@ -32,7 +33,7 @@ impl Default for Wind {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum TimeOfDay {
     Morning,
     Daytime,
@@ -46,7 +47,7 @@ impl Default for TimeOfDay {
     }
 }
 
-#[derive(Default, Debug)]
+#[derive(Default, Debug, Clone)]
 pub struct Conditions {
     // Temperature in units (°F)
     pub temperature: i16,
@@ -138,6 +139,8 @@ fn resolve_weather(weather: &WeatherReportCurrent) -> Weather {
 }
 
 pub fn get_current(owm_api_key: &str, loc: &LocationSpecifier) -> Result<Conditions> {
+    debug!("Getting weather for {:?}", loc);
+
     let settings: Settings = Settings {
         unit: Some(Unit::Imperial),
         lang: Some(Language::English),
@@ -148,8 +151,7 @@ pub fn get_current(owm_api_key: &str, loc: &LocationSpecifier) -> Result<Conditi
     let forecast_time = UNIX_EPOCH + Duration::from_secs(weather.dt);
     let freshness_sec = SystemTime::now().duration_since(forecast_time)?.as_secs();
 
-    // TODO: what loggers are out there?
-    println!(
+    debug!(
         "Fetched OpenWeatherMap data from {} minutes ago",
         freshness_sec / 60
     );
