@@ -1,5 +1,7 @@
 # 🎽 What to wear running
 
+[![MIT license](https://img.shields.io/github/license/kesyog/wtw-running?style=flat-square)](https://github.com/kesyog/wtw-running/blob/master/LICENSE) [![build status](https://img.shields.io/github/workflow/status/kesyog/wtw-running/Rust?style=flat-square)](https://github.com/kesyog/wtw-running/actions)
+
 A CLI tool and Alexa skill that recommends a running outfit for you based on weather conditions
 pulled from [OpenWeatherMap](https://openweathermap.org) and given user preferences.
 
