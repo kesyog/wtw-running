@@ -16,6 +16,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: markdownlint
+      uses: avto-dev/markdown-lint@v1
+      with: 
+        config: './lint/mdl_config.yml'
+        args: './README.md'
     - uses: actions-rs/toolchain@v1
       with:
           toolchain: stable
