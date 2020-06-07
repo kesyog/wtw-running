@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Context, Result};
+use crate::{Error, Result};
 use log::debug;
 use openweather::{Language, LocationSpecifier, Settings, Unit, WeatherReportCurrent};
 use std::fmt;
@@ -61,12 +61,12 @@ impl Conditions {
         match self.weather {
             Weather::Rain | Weather::HeavyRain => {
                 if self.temperature < 30 {
-                    return Err(anyhow!("It's too cold for rain"));
+                    return Err(Error::InvalidWeather(self.clone()));
                 }
             }
             Weather::Snow => {
                 if self.temperature > 45 {
-                    return Err(anyhow!("It's too warm for snow"));
+                    return Err(Error::InvalidWeather(self.clone()));
                 }
             }
             _ => (),
@@ -146,8 +146,7 @@ pub fn get_current(owm_api_key: &str, loc: &LocationSpecifier) -> Result<Conditi
         lang: Some(Language::English),
     };
 
-    let weather = openweather::get_current_weather(loc, owm_api_key, &settings)
-        .with_context(|| "Failed to fetch the weather")?;
+    let weather = openweather::get_current_weather(loc, owm_api_key, &settings)?;
     let forecast_time = UNIX_EPOCH + Duration::from_secs(weather.dt);
     let freshness_sec = SystemTime::now().duration_since(forecast_time)?.as_secs();
 
