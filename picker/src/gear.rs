@@ -1,6 +1,6 @@
-use super::inputs::{Intensity, RunParameters, Sex};
-use super::weather::{TimeOfDay, Weather};
-use anyhow::{anyhow, Result};
+use crate::{Error, Result};
+use crate::inputs::{Intensity, RunParameters, Sex};
+use crate::weather::{TimeOfDay, Weather};
 use std::fmt;
 
 #[derive(Default, Clone, Copy)]
@@ -294,7 +294,7 @@ impl Outfit {
         }
 
         if outfit.torso.is_empty() || outfit.legs.is_empty() || outfit.feet.is_empty() {
-            Err(anyhow!("Invalid outfit {}", outfit))
+            Err(Error::InvalidOutfit(outfit))
         } else {
             Ok(outfit)
         }

@@ -1,4 +1,4 @@
-use super::weather::{Conditions, TimeOfDay, Weather, Wind};
+use crate::weather::{Conditions, TimeOfDay, Weather, Wind};
 use std::fmt;
 
 #[derive(Debug, Clone)]
