@@ -27,10 +27,10 @@ fn main() -> Result<()> {
 // Get OpenWeatherMap
 fn get_owm_key() -> Result<String> {
     dotenv::dotenv().ok();
-    dotenv::var("OWM_API_KEY").or_else(|_| Err(anyhow!("No OpenWeatherMap API key provided")))
+    dotenv::var("OWM_API_KEY").map_err(|_| anyhow!("No OpenWeatherMap API key provided"))
 }
 
 #[cfg(not(feature = "dotenv_key"))]
 fn get_owm_key() -> Result<String> {
-    std::env::var("OWM_API_KEY").or_else(|_| Err(anyhow!("No OpenWeatherMap API key provided")))
+    std::env::var("OWM_API_KEY").map_err(|_| anyhow!("No OpenWeatherMap API key provided"))
 }

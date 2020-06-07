@@ -1,8 +1,10 @@
+use crate::error::OutfitHandlerError;
 use alexa_sdk::Request;
-use anyhow::{anyhow, Result};
 use log::info;
 use openweather::LocationSpecifier;
 use serde_derive::{Deserialize, Serialize};
+
+type Result<T> = std::result::Result<T, OutfitHandlerError>;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 struct PostalCodeResponse {
@@ -14,7 +16,7 @@ struct PostalCodeResponse {
 
 impl From<PostalCodeResponse> for LocationSpecifier {
     fn from(src: PostalCodeResponse) -> Self {
-        LocationSpecifier::ZipCode {
+        Self::ZipCode {
             zip: src.postal_code,
             // Super brittle to use the Alexa country code directly with OpenWeatherMap
             // Works for the US so good enough for now
@@ -31,7 +33,7 @@ fn get_geolocation(req: &Request) -> Option<LocationSpecifier> {
     Some(LocationSpecifier::Coordinates { lat, lon })
 }
 
-pub fn get_location(req: &Request) -> Result<LocationSpecifier> {
+pub fn get(req: &Request) -> Result<LocationSpecifier> {
     if let Some(loc) = get_geolocation(req) {
         return Ok(loc);
     }
@@ -41,20 +43,20 @@ pub fn get_location(req: &Request) -> Result<LocationSpecifier> {
         .system
         .api_endpoint
         .as_ref()
-        .ok_or_else(|| anyhow!("No api_endpoint given"))?;
-    let api_access_token = req
+        .ok_or_else(|| OutfitHandlerError::InvalidAlexaRequest(Box::new(req.clone())))?;
+    let auth_header = req
         .context
         .system
         .api_access_token
         .as_ref()
-        .ok_or_else(|| anyhow!("No access token given"))?;
-    let auth_header = format!("Bearer {}", api_access_token);
+        .map(|token| format!("Bearer {}", token))
+        .ok_or_else(|| OutfitHandlerError::InvalidAlexaRequest(Box::new(req.clone())))?;
     let device_id = &req
         .context
         .system
         .device
         .as_ref()
-        .ok_or_else(|| anyhow!("No device given"))?
+        .ok_or_else(|| OutfitHandlerError::InvalidAlexaRequest(Box::new(req.clone())))?
         .device_id;
     let uri = format!(
         "{api_endpoint}/v1/devices/{device_id}/settings/address/countryAndPostalCode",
@@ -68,7 +70,7 @@ pub fn get_location(req: &Request) -> Result<LocationSpecifier> {
         .header("Authorization", auth_header)
         .send()?;
     if response.status() != 200 {
-        return Err(anyhow!("Received error code {}", response.status()));
+        return Err(OutfitHandlerError::NoLocationPermissions);
     }
 
     let loc: LocationSpecifier =
