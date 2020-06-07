@@ -1,16 +1,16 @@
 use crate::error::OutfitHandlerError;
 use crate::location;
 use alexa_sdk::{
+    request::IntentType,
     response::{Card, Speech},
     Request, Response,
 };
 use anyhow::anyhow;
-use log::{error, info};
+use log::{error, info, warn};
 use picker::{
     gear::Outfit,
-    inputs::{RunParameters, UserPreferences},
+    inputs::{Intensity, RunParameters, Sex, UserPreferences},
     weather,
-    weather::Conditions,
 };
 use std::fmt::Write;
 
@@ -32,11 +32,7 @@ fn join_english_list(items: &[&str]) -> String {
     }
 }
 
-fn get_outfit(conditions: &Conditions) -> Result<String, OutfitHandlerError> {
-    let preferences = UserPreferences::default();
-    let params = RunParameters::new(conditions, &preferences);
-
-    let outfit = Outfit::new(&params)?;
+fn outfit_to_speech(outfit: &Outfit) -> Result<String, OutfitHandlerError> {
     let mut speech = String::new();
     if !outfit.torso.is_empty() || !outfit.legs.is_empty() {
         write!(&mut speech, "You should wear ")?;
@@ -71,9 +67,52 @@ pub fn handler(req: &Request) -> anyhow::Result<Response> {
     let owm_api_key =
         std::env::var("OWM_API_KEY").map_err(|_| anyhow!("No OpenWeatherMap API key provided"))?;
 
+    let sex = req
+        .body
+        .intent
+        .as_ref()
+        .and_then(|intent| intent.slots.as_ref())
+        .and_then(|slots| slots.get("sex"))
+        .and_then(|slot| slot.resolutions.as_ref())
+        .and_then(|resolutions| resolutions.resolutions_per_authority.get(0))
+        .and_then(|rpa| rpa.values.get(0))
+        .map(|value_wrapper| &value_wrapper.value.id)
+        .map(|id| {
+            if id == "female" {
+                Sex::Female
+            } else {
+                if id != "male" {
+                    warn!("unknown slot id for sex: {}", id);
+                }
+                Sex::Male
+            }
+        })
+        .unwrap_or(Sex::Male);
+
+    let intensity = match req.intent() {
+        IntentType::User(name) => match name.as_str() {
+            "GetOutfitLongRun" => Intensity::LongRun,
+            "GetOutfitRace" => Intensity::Race,
+            "GetOutfitWorkout" => Intensity::Workout,
+            _ => Intensity::Average,
+        },
+        _ => Intensity::Average,
+    };
+
+    let preferences = UserPreferences {
+        sex,
+        intensity,
+        ..UserPreferences::default()
+    };
+
+    info!("{:?}", preferences);
+
     let speech: Result<String, OutfitHandlerError> = location::get(req)
         .and_then(|loc| weather::get_current(&owm_api_key, &loc).map_err(|e| e.into()))
-        .and_then(|conditions| get_outfit(&conditions));
+        .and_then(|conditions| {
+            Outfit::new(&RunParameters::new(&conditions, &preferences)).map_err(|e| e.into())
+        })
+        .and_then(|outfit| outfit_to_speech(&outfit));
 
     match speech {
         Ok(speech) => {
