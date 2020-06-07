@@ -16,7 +16,7 @@ pub enum Weather {
 
 impl Default for Weather {
     fn default() -> Self {
-        Weather::Clear
+        Self::Clear
     }
 }
 
@@ -29,7 +29,7 @@ pub enum Wind {
 
 impl Default for Wind {
     fn default() -> Self {
-        Wind::Calm
+        Self::Calm
     }
 }
 
@@ -43,7 +43,7 @@ pub enum TimeOfDay {
 
 impl Default for TimeOfDay {
     fn default() -> Self {
-        TimeOfDay::Daytime
+        Self::Daytime
     }
 }
 

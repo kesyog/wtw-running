@@ -1,6 +1,6 @@
-use crate::{Error, Result};
 use crate::inputs::{Intensity, RunParameters, Sex};
 use crate::weather::{TimeOfDay, Weather};
+use crate::{Error, Result};
 use std::fmt;
 
 #[derive(Default, Clone, Copy)]
@@ -260,7 +260,7 @@ impl fmt::Display for Outfit {
 }
 
 impl Outfit {
-    pub fn new(params: &RunParameters) -> Result<Outfit> {
+    pub fn new(params: &RunParameters) -> Result<Self> {
         let head_options = vec![&WINTER_CAP, &HAT];
         let torso_options = vec![
             &HEAVY_JACKET,
@@ -276,12 +276,12 @@ impl Outfit {
         let feet_options = vec![&SHOES];
         let accessories_options = vec![&GLOVES, &SUNGLASSES, &SUNBLOCK];
 
-        let mut outfit = Outfit {
-            head: filter_wearable(&head_options, &params),
-            torso: filter_wearable(&torso_options, &params),
-            legs: filter_wearable(&legs_options, &params),
-            feet: filter_wearable(&feet_options, &params),
-            accessories: filter_wearable(&accessories_options, &params),
+        let mut outfit = Self {
+            head: filter_wearable(&head_options, params),
+            torso: filter_wearable(&torso_options, params),
+            legs: filter_wearable(&legs_options, params),
+            feet: filter_wearable(&feet_options, params),
+            accessories: filter_wearable(&accessories_options, params),
         };
 
         // Special override for males running races

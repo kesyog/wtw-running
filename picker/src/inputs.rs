@@ -10,7 +10,7 @@ pub enum Sex {
 impl Default for Sex {
     fn default() -> Self {
         // ¯\_(ツ)_/¯
-        Sex::Male
+        Self::Male
     }
 }
 
@@ -24,7 +24,7 @@ pub enum Intensity {
 
 impl Default for Intensity {
     fn default() -> Self {
-        Intensity::Average
+        Self::Average
     }
 }
 
@@ -37,7 +37,7 @@ pub enum Feel {
 
 impl Default for Feel {
     fn default() -> Self {
-        Feel::Average
+        Self::Average
     }
 }
 
@@ -66,16 +66,16 @@ pub struct RunParameters {
 }
 
 impl RunParameters {
-    pub fn new(conditions: &Conditions, preferences: &UserPreferences) -> RunParameters {
+    pub fn new(conditions: &Conditions, preferences: &UserPreferences) -> Self {
         let effective_temperature = Self::calculate_effective_temperature(conditions, preferences);
-        RunParameters {
+        Self {
             conditions: conditions.clone(),
             preferences: preferences.clone(),
             effective_temperature,
         }
     }
 
-    pub fn effective_temperature(&self) -> i16 {
+    pub const fn effective_temperature(&self) -> i16 {
         self.effective_temperature
     }
 

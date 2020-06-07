@@ -1,5 +1,7 @@
+use crate::error::OutfitHandlerError;
 use crate::location;
 use alexa_sdk::{Request, Response};
+use anyhow::anyhow;
 use log::{error, info};
 use picker::{
     gear::Outfit,
@@ -9,7 +11,12 @@ use picker::{
 };
 use std::fmt::Write;
 
-type Error = Box<dyn std::error::Error + Send + Sync + 'static>;
+const INSUFFICIENT_LOCATION_PERMISSION_TEXT: &str =
+    "I couldn't figure out where you are. Please enable location services permissions for this skill in the Alexa app";
+const INSUFFICIENT_LOCATION_PERMISSION_TITLE: &str = "🌐 No location found";
+const FETCH_WEATHER_ERROR_TEXT: &str =
+    "I had an issue retrieving weather data for your location. Please try again later.";
+const FETCH_WEATHER_ERROR_TITLE: &str = "No weather data";
 
 // Flatten a collection of strings into a single string, adding in commas as necessary, and adding
 // "and" before the last item.
@@ -22,7 +29,7 @@ fn join_english_list(items: &[&str]) -> String {
     }
 }
 
-fn get_outfit(conditions: &Conditions) -> Result<String, Error> {
+fn get_outfit(conditions: &Conditions) -> Result<String, OutfitHandlerError> {
     let preferences = UserPreferences::default();
     let params = RunParameters::new(conditions, &preferences);
 
@@ -57,27 +64,35 @@ fn get_outfit(conditions: &Conditions) -> Result<String, Error> {
     Ok(speech.trim().to_string())
 }
 
-// TODO: this should return an error type that gets mapped to a response at a higher level
-pub fn handler(req: &Request) -> Result<Response, Error> {
-    let owm_api_key = std::env::var("OWM_API_KEY").expect("No OpenWeatherMap API key provided");
+pub fn handler(req: &Request) -> anyhow::Result<Response> {
+    let owm_api_key =
+        std::env::var("OWM_API_KEY").map_err(|_| anyhow!("No OpenWeatherMap API key provided"))?;
 
-    let loc = location::get_location(&req);
-    if let Err(e) = loc {
-        info!("Could not get location: {}", e);
-        // TODO: return a AskForPermissionsConsent card
-        return Ok(Response::simple("🌐 No location found", "I couldn't figure out where you are. Please enable location permissions for this skill in the Alexa app"));
+    let speech: Result<String, OutfitHandlerError> = location::get(req)
+        .and_then(|loc| weather::get_current(&owm_api_key, &loc).map_err(|e| e.into()))
+        .and_then(|conditions| get_outfit(&conditions));
+
+    match speech {
+        Ok(speech) => {
+            info!("Recommending outfit: {}", speech);
+            Ok(Response::simple("Outfit", &speech))
+        }
+        Err(OutfitHandlerError::NoLocationPermissions) => Ok(Response::simple(
+            INSUFFICIENT_LOCATION_PERMISSION_TITLE,
+            INSUFFICIENT_LOCATION_PERMISSION_TEXT,
+        )),
+        Err(OutfitHandlerError::OutfitPickerError(picker::Error::FetchWeather(e))) => {
+            error!("{}", e);
+            Ok(Response::simple(
+                FETCH_WEATHER_ERROR_TITLE,
+                FETCH_WEATHER_ERROR_TEXT,
+            ))
+        }
+        Err(e) => {
+            error!("{}", e);
+            Err(e.into())
+        }
     }
-    let loc = loc.unwrap();
-
-    let conditions = weather::get_current(&owm_api_key, &loc).or_else(|e| {
-        error!("Could not get weather for {:?}", &loc);
-        Err(e)
-    })?;
-
-    let speech = get_outfit(&conditions)
-        .or_else::<Error, _>(|_| Ok("I had trouble finding you an outfit".to_string()))?;
-    info!("Recommending outfit: {}", speech);
-    Ok(Response::simple("Outfit", &speech))
 }
 
 #[cfg(test)]
