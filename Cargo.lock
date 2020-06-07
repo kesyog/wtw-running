@@ -3,7 +3,7 @@
 [[package]]
 name = "alexa_sdk"
 version = "0.1.5"
-source = "git+https://github.com/kesyog/alexa_rust?branch=kyogeswaran/geolocation-interface#ba82b219bd260ed403385847976d9891adf67bb4"
+source = "git+https://github.com/kesyog/alexa_rust#1710fa2e53eab82579db5e09a4e7d559f164a8f2"
 dependencies = [
  "serde",
  "serde_derive",

@@ -10,7 +10,7 @@ name = "bootstrap"
 path = "src/main.rs"
 
 [dependencies]
-alexa_sdk = { git = "https://github.com/kesyog/alexa_rust", branch = "kyogeswaran/geolocation-interface" }
+alexa_sdk = { git = "https://github.com/kesyog/alexa_rust" }
 anyhow = "^1.0"
 lambda = { git = "https://github.com/awslabs/aws-lambda-rust-runtime", rev = "ed3fd167528125b73ce47abfadc38cd274bf59bc" }
 log = "^0.4"

@@ -1,6 +1,9 @@
 use crate::error::OutfitHandlerError;
 use crate::location;
-use alexa_sdk::{Request, Response};
+use alexa_sdk::{
+    response::{Card, Speech},
+    Request, Response,
+};
 use anyhow::anyhow;
 use log::{error, info};
 use picker::{
@@ -12,8 +15,8 @@ use picker::{
 use std::fmt::Write;
 
 const INSUFFICIENT_LOCATION_PERMISSION_TEXT: &str =
-    "I couldn't figure out where you are. Please enable location services permissions for this skill in the Alexa app";
-const INSUFFICIENT_LOCATION_PERMISSION_TITLE: &str = "🌐 No location found";
+    "I couldn't figure out your current location. Please enable the location services permission \
+    for this skill in the Alexa app";
 const FETCH_WEATHER_ERROR_TEXT: &str =
     "I had an issue retrieving weather data for your location. Please try again later.";
 const FETCH_WEATHER_ERROR_TITLE: &str = "No weather data";
@@ -77,10 +80,13 @@ pub fn handler(req: &Request) -> anyhow::Result<Response> {
             info!("Recommending outfit: {}", speech);
             Ok(Response::simple("Outfit", &speech))
         }
-        Err(OutfitHandlerError::NoLocationPermissions) => Ok(Response::simple(
-            INSUFFICIENT_LOCATION_PERMISSION_TITLE,
-            INSUFFICIENT_LOCATION_PERMISSION_TEXT,
-        )),
+        Err(OutfitHandlerError::NoLocationPermissions) => Ok(Response::end()
+            .speech(Speech::plain(INSUFFICIENT_LOCATION_PERMISSION_TEXT))
+            // Ask user for location permissions
+            .card(Card::ask_for_permission(vec![
+                "read::alexa:device:all:address:country_and_postal_code".to_string(),
+                "alexa::devices:all:geolocation:read".to_string(),
+            ]))),
         Err(OutfitHandlerError::OutfitPickerError(picker::Error::FetchWeather(e))) => {
             error!("{}", e);
             Ok(Response::simple(
